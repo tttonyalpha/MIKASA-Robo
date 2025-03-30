@@ -112,6 +112,7 @@ class Logger:
 			wandb_tags = cfg_to_group(cfg, return_list=True) + [f"seed:{cfg.seed}"] + ["tdmpc2"]
 			if cfg.setting_tag != 'none':
 				wandb_tags += [cfg.setting_tag]
+			wandb.login(key='94838fbb7e6b76591a416382f5cea0b64d88ee24')
 			self._wandb = wandb.init(
 				project=self.project,
 				entity=self.entity,

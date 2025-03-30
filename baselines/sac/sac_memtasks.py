@@ -171,7 +171,7 @@ class Args:
     """path to a pretrained checkpoint file to start evaluation/training from"""
     render_mode: str = "all"
     """the environment rendering mode"""
-    log_freq: int = 1_000
+    log_freq: int = 25
     """logging frequency in terms of environment steps"""
 
     # Algorithm specific arguments
@@ -931,6 +931,7 @@ if __name__ == "__main__":
     while global_step < args.total_timesteps:
         if args.eval_freq > 0 and (global_step - args.training_freq) // args.eval_freq < global_step // args.eval_freq:
             # evaluate
+            print("Evanuation!!!")
             actor.eval()
             stime = time.perf_counter()
             eval_obs, _ = eval_envs.reset()
@@ -948,16 +949,18 @@ if __name__ == "__main__":
             for k, v in eval_metrics.items():
                 mean = torch.stack(v).float().mean()
                 eval_metrics_mean[k] = mean
-                if logger is not None:
-                    logger.add_scalar(f"eval/{k}", mean, global_step)
+                print('df')
+                if writer is not None:
+                    print(f'logger added {mean}, {global_step}')
+                    writer.add_scalar(f"eval/{k}", mean, global_step)
             pbar.set_description(
                 f"success_once: {eval_metrics_mean['success_once']:.2f}, "
                 f"return: {eval_metrics_mean['return']:.2f}"
             )
-            if logger is not None:
+            if writer is not None:
                 eval_time = time.perf_counter() - stime
                 cumulative_times["eval_time"] += eval_time
-                logger.add_scalar("time/eval_time", eval_time, global_step)
+                writer.add_scalar("time/eval_time", eval_time, global_step)
             if args.evaluate:
                 break
             actor.train()
@@ -1005,7 +1008,7 @@ if __name__ == "__main__":
                 for k in real_next_obs.keys():
                     real_next_obs[k][need_final_obs] = infos["final_observation"][k][need_final_obs].clone()
                 for k, v in final_info["episode"].items():
-                    logger.add_scalar(f"train/{k}", v[done_mask].float().mean(), global_step)
+                    writer.add_scalar(f"train/{k}", v[done_mask].float().mean(), global_step)
 
             rb.add(obs, real_next_obs, actions, rewards, stop_bootstrap)
 
@@ -1081,21 +1084,21 @@ if __name__ == "__main__":
 
         # Log training-related data
         if (global_step - args.training_freq) // args.log_freq < global_step // args.log_freq:
-            logger.add_scalar("losses/qf1_values", qf1_a_values.mean().item(), global_step)
-            logger.add_scalar("losses/qf2_values", qf2_a_values.mean().item(), global_step)
-            logger.add_scalar("losses/qf1_loss", qf1_loss.item(), global_step)
-            logger.add_scalar("losses/qf2_loss", qf2_loss.item(), global_step)
-            logger.add_scalar("losses/qf_loss", qf_loss.item() / 2.0, global_step)
-            logger.add_scalar("losses/actor_loss", actor_loss.item(), global_step)
-            logger.add_scalar("losses/alpha", alpha, global_step)
-            logger.add_scalar("time/update_time", update_time, global_step)
-            logger.add_scalar("time/rollout_time", rollout_time, global_step)
-            logger.add_scalar("time/rollout_fps", global_steps_per_iteration / rollout_time, global_step)
+            writer.add_scalar("losses/qf1_values", qf1_a_values.mean().item(), global_step)
+            writer.add_scalar("losses/qf2_values", qf2_a_values.mean().item(), global_step)
+            writer.add_scalar("losses/qf1_loss", qf1_loss.item(), global_step)
+            writer.add_scalar("losses/qf2_loss", qf2_loss.item(), global_step)
+            writer.add_scalar("losses/qf_loss", qf_loss.item() / 2.0, global_step)
+            writer.add_scalar("losses/actor_loss", actor_loss.item(), global_step)
+            writer.add_scalar("losses/alpha", alpha, global_step)
+            writer.add_scalar("time/update_time", update_time, global_step)
+            writer.add_scalar("time/rollout_time", rollout_time, global_step)
+            writer.add_scalar("time/rollout_fps", global_steps_per_iteration / rollout_time, global_step)
             for k, v in cumulative_times.items():
-                logger.add_scalar(f"time/total_{k}", v, global_step)
-            logger.add_scalar("time/total_rollout+update_time", cumulative_times["rollout_time"] + cumulative_times["update_time"], global_step)
+                writer.add_scalar(f"time/total_{k}", v, global_step)
+            writer.add_scalar("time/total_rollout+update_time", cumulative_times["rollout_time"] + cumulative_times["update_time"], global_step)
             if args.autotune:
-                logger.add_scalar("losses/alpha_loss", alpha_loss.item(), global_step)
+                writer.add_scalar("losses/alpha_loss", alpha_loss.item(), global_step)
 
     if not args.evaluate and args.save_model:
         model_path = f"runs/{run_name}/final_ckpt.pt"

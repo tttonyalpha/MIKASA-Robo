@@ -1,4 +1,4 @@
-name: tdmpc2-ms
+name: tdmpc2-ms3
 channels:
   - pytorch-nightly
   - nvidia
@@ -39,7 +39,7 @@ dependencies:
     - protobuf==4.25.2
     - pillow==10.2.0
     - pyquaternion==0.9.9
-    - tensordict-nightly
+    - tensordict==0.7.2
     - termcolor==2.4.0
     - torchrl-nightly
     - transforms3d==0.4.1
@@ -48,6 +48,7 @@ dependencies:
     - wandb==0.16.2
     - wheel==0.38.0
     - mani_skill>=3.0.0b12
+    - mikasa_robo_suite
     ####################
     # Gym:
     # (unmaintained but required for maniskill2/meta-world/myosuite)

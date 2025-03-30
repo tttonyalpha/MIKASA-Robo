@@ -16,10 +16,13 @@ render_mode: all #rgb_array # ['rgb_array' for quality, or 'sensors' for speed]
 render_size: 64
 setting_tag: none # ['none', 'walltime_efficient', 'sample_efficient', ...] for wandb tags
 
+num_steps: 90
+num_eval_steps: 270
+
 # evaluation
 checkpoint: ???
 eval_episodes_per_env: 2 # total (eval_episodes_per_env * num_eval_envs number) of eval episodes
-eval_freq: 5000
+eval_freq: 50000
 eval_reconfiguration_frequency: 1
 
 # training
